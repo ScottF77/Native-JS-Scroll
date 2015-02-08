@@ -1,0 +1,142 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		body{margin: 0; padding: 0;}
+		#container{width:100%;height:4000px;background-color: #fff;}
+		#output{position: fixed;top:0; left: 0;}
+		#eToTop{position: fixed;top:0; right:0;}
+		#a{width:100%;height:500px;background-color: red;}
+		#b{width:100%;height:500px;background-color: blue;}
+		#c{width:100%;height:500px;background-color: green;}
+		#d{width:100%;height:500px;background-color: yellow;}
+		#e{width:100%;height:500px;background-color: aqua;}
+		#f{width:100%;height:500px;background-color: magenta;}
+		#g{width:100%;height:500px;background-color: pink;}
+		#h{width:100%;height:500px;background-color: purple;}
+
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div id="output"></div>
+		<div id="eToTop"></div>
+		<div id="a">A</div>
+		<div id="b">B</div>
+		<div id="c">C</div>
+		<div id="d">D</div>
+		<div id="e">E</div>
+		<div id="f">F</div>
+		<div id="g">G</div>
+		<div id="h">H</div>
+	</div>
+	<script type="text/javascript">
+		window.onscroll = function(){
+			var body = document.body,
+	    		html = document.documentElement;
+
+			var pageHeight = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+			var windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+			var bElement = document.getElementById('b');
+			var bBounding = bElement.getBoundingClientRect();
+
+			var eElement = document.getElementById('e');
+			var eBounding = eElement.getBoundingClientRect();
+
+			var bTop = bBounding.top;
+			var bBottom = bBounding.bottom;
+			var bHeight = bBounding.bottom - bBounding.top;
+
+			var eTop = eBounding.top;
+			var eBottom = eBounding.bottom;
+			var eHeight = eBounding.bottom - eBounding.top;
+
+			var beDistance = eBounding.top - bBounding.top;
+
+			var eToTop = eBounding.top - windowHeight;
+
+			// Distance from top
+			var distFromTop = window.pageYOffset || body.scrollTop;
+
+			// Pixels from bottom
+			var distFromBottom = pageHeight - distFromTop;
+
+			var outputText = "Height of page = " + pageHeight + "<br>Height of window = " + windowHeight + "<br>Top of block E = " + eTop + "<br>Bottom of block E = " + eBottom + "<br>Height of block E = " + eHeight + "<br>Distance between B and E = " + beDistance + "<br>Distance for block E to move to top of screen = " + eTop;
+
+			document.getElementById('output').innerHTML = outputText;		
+
+			document.getElementById('eToTop').innerHTML = distFromTop + "<br>" + distFromBottom;
+		}
+
+		function scrollToBlock (){
+			var body = document.body,
+	    		html = document.documentElement,
+	    		timeoutID = null;
+
+			var pageHeight = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+			var windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+			var distFromTop = window.pageYOffset || body.scrollTop;
+
+			// find target
+			var targetElement = document.getElementById('e');
+			var targetBounding = targetElement.getBoundingClientRect();
+			// find distance to travel
+			var targetTop = targetBounding.top;
+			// will the page still have content below bottom of the window
+			var pixelsBelowWindowBottom = ((pageHeight - distFromTop) - targetTop) - windowHeight;
+			// scroll points
+			// used when space reamins below the fold
+			var stopPoint = distFromTop + targetTop;
+			// used when scrolling to bottom
+			var scrollDistance = (pageHeight - distFromTop) - windowHeight;
+			var endPage = distFromTop + scrollDistance;
+			//used by both parts of scroll
+			var currentPos = distFromTop;
+
+			// function to handle scroll
+			function scrollDown (currentPos, stopPoint, endPage) {
+				timeoutID = setTimeout(function(){
+					currentPos += 10;
+					window.scrollTo(0, currentPos);
+
+					if (stopPoint === null){
+						scrollDest = endPage;
+					} else {
+						scrollDest = stopPoint;
+					}
+
+					if (currentPos < scrollDest){
+						scrollDown(currentPos, stopPoint, endPage);
+					} else {
+						stopTimer(timeoutID);
+					}
+
+				}, 10);
+			}
+
+			// if there are pixels left then it should only move this distance
+			// there is space below the fold so endPage is set to null
+			if (pixelsBelowWindowBottom > 0){
+				scrollDown(currentPos, stopPoint, null);
+			}
+			// no pixels left below the fold so stopPoint is set to null
+			else {
+				scrollDown(currentPos, null, endPage);
+			}
+
+		}
+
+		function stopTimer(timeoutID){
+			clearTimeout(timeoutID);
+		}
+
+		var elB = document.getElementById("b");
+		elB.addEventListener("click", scrollToBlock, false);
+
+	</script>
+</body>
+</html>
